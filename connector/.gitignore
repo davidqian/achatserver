@@ -1,2 +1,6 @@
 .idea
 connector.iml
+../.DS_Store
+src/github.com
+src/gopkg.in
+
