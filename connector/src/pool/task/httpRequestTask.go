@@ -1,13 +1,18 @@
 package pool
 
-//调用 http 协议处理请求
+import (
+	"fmt"
+	"net/http"
+)
+
 type HttpRequestTask struct {
-	payload []byte
-	cbObject interface{} //TODO：这里需要提取出去
+	Payload []byte
+	Conn ConnectionAble
 }
 
-func (task *HttpRequestTask) DoTask()(err error){
-	//发送 http 请求处理业务逻辑
+func (task *HttpRequestTask) DoTask(httpClient *http.Client)(err error){
+	task.Conn.WriteMessage(task.Payload)
+	fmt.Println("把数据原样返回了")
 	return
 }
 

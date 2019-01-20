@@ -4,6 +4,8 @@ import (
 	"errors"
 	"github.com/gorilla/websocket"
 	"github.com/satori/go.uuid"
+	pool2 "pool"
+	"pool/task"
 	"sync"
 )
 
@@ -12,9 +14,6 @@ type Connection struct {
 	Uuid string  //未登录时使用
 
 	wsConn *websocket.Conn
-	inChan chan []byte
-	outChan chan []byte
-	closeChan chan byte
 	mutex sync.Mutex
 	isClose bool
 	setManager SetManagerAble
@@ -30,9 +29,6 @@ func initConnection(wsConn *websocket.Conn, setManger SetManagerAble)(conn *Conn
 	)
 	conn = &Connection{
 		wsConn: wsConn,
-		inChan: make(chan []byte, 100),
-		outChan: make(chan []byte, 100),
-		closeChan: make(chan byte, 1),
 		setManager:setManger,
 	}
 
@@ -45,42 +41,36 @@ func initConnection(wsConn *websocket.Conn, setManger SetManagerAble)(conn *Conn
 	//启动读协程
 	go conn.readLoop()
 
+	return
 ERR:
-	err = errors.New("uuid error")
-
 	return
 }
 
 func (conn *Connection)Close(){
+
 	//线程安全的，可重入的
 	conn.wsConn.Close()
 
 	//closeChan 关闭只能被调用一次
 	conn.mutex.Lock()
 	if !conn.isClose {
-		close(conn.closeChan)
 		conn.isClose = true
+		conn.setManager.RemoveConnection(conn)
 	}
 	conn.mutex.Unlock()
-}
 
-func (conn *Connection) ReadMessage()(data[]byte, err error){
-	select {
-	case data = <- conn.inChan:
-	case <- conn.closeChan:
-		err = errors.New("connection is closed!")
-	}
-	return
 }
 
 //TODO:直接把数据给网卡，是否需要考虑合包？
 func (conn *Connection) WriteMessage(data []byte)(err error){
 	if conn.isClose {
 		err = errors.New("socket is closed!")
+		return
 	}
 	if err = conn.wsConn.WriteMessage(websocket.TextMessage,data); err != nil{
 		goto ERR
 	}
+	return
 ERR:
 	conn.Close()
 	return
@@ -96,11 +86,13 @@ func (conn *Connection) readLoop(){
 		if _,data,err = conn.wsConn.ReadMessage();err != nil{
 			goto ERR
 		}
-		select {
-		case conn.inChan <- data:
-		case <- conn.closeChan:
-			goto ERR
+		//TODO: task 需要按协议封装
+		var task pool2.TaskAble
+		task = &pool.HttpRequestTask{
+			Payload: data,
+			Conn:conn,
 		}
+		conn.setManager.AddRequestTask(task, conn)
 	}
 ERR:
 	conn.Close()

@@ -32,13 +32,16 @@ func (ws *WsServer)ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if wsConn, err = upgrader.Upgrade(w, r, nil); err != nil {
 		return
 	}
-
 	if conn, err = initConnection(wsConn, ws.setManager);err != nil{
 		goto ERR
 	}
 
+	ws.setManager.AddConnection(conn)
+
+	return
 ERR:
 	conn.Close()
+	return
 }
 
 //TODO:可实现相应的 http server 配置

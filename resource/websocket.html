@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>Web Socket JavaScript Echo Client</title>
+  <script src="http://cdn.jsdelivr.net/sockjs/1/sockjs.min.js"></script>
+  <script language="javascript" type="text/javascript">
+    var echo_websocket;
+    var wsUri = "ws://localhost:8888/ws";
+    
+    function createWebsocket()
+    {
+        echo_websocket = new WebSocket(wsUri);
+        
+        echo_websocket.onopen = function (evt) {
+          writeToScreen("Connected !");
+          //doSend(textID.value);
+        };
+        echo_websocket.onmessage = function (evt) {
+          writeToScreen("Received message: " + evt.data);
+          //echo_websocket.close();
+        };
+        echo_websocket.onerror = function (evt) {
+          writeToScreen('<span style="color: red;">ERROR:</span> '
+            + evt.data);
+          echo_websocket.close();
+        };
+        echo_websocket.onclose = function () {
+            writeToScreen('<span style="color: red;">CLOSE:</span> ');
+          };
+          
+        clearScreen();
+    }
+    
+    
+    function init() {
+      output = document.getElementById("output");
+      writeToScreen("Connecting to " + wsUri);
+      
+      createWebsocket();
+    }
+ 
+    function send_echo() {
+    	if(echo_websocket!=null && echo_websocket.readyState==1)
+    	{
+    		doSend(textID.value);    	
+    	} else
+    	{
+    		createWebsocket();
+    		//重新连接后，跟着马上发送数据会失败！（我猜测是异步执行的关系）
+    		//得等到  连接成功事件收到后 再发送。
+    	}
+    }
+    function closeWebSocket() {
+        echo_websocket.close();
+    }
+    function doSend(message) {
+      echo_websocket.send(message);
+      writeToScreen("Sent message: " + message);
+    }
+    function writeToScreen(message) {
+      var pre = document.createElement("p");
+      pre.style.wordWrap = "break-word";
+      pre.innerHTML = message;
+      output.appendChild(pre);
+    }    
+    function clearScreen(message) {
+        output.innerHTML="";
+      }       
+    window.addEventListener("load", init, false);
+  </script>
+</head>
+<body>
+<h1>Echo Server</h1>
+<div style="text-align: left;">
+  <form action="">
+    <input onclick="closeWebSocket()" value="关闭socket长链接" type="button">
+    </ br>
+    </ br>
+    <input id="textID" name="message" value="hello chat server" type="text">
+    </ br>
+    <input onclick="send_echo()" value="发送socket请求" type="button">
+    <br>
+  </form>
+</div>
+<div id="output"></div>
+</body>
+</html>
