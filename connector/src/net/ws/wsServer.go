@@ -3,7 +3,6 @@ package ws
 import (
 	"errors"
 	"github.com/gorilla/websocket"
-	"net/connectset"
 	"net/http"
 	"time"
 )
@@ -13,7 +12,7 @@ type WsServer struct {
 	Addr string
 	Pattern string
 	server *http.Server
-	setManager *net.SetManager
+	setManager SetManagerAble
 }
 
 var(
@@ -26,32 +25,26 @@ var(
 
 func (ws *WsServer)ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var(
-		wxConn *websocket.Conn
+		wsConn *websocket.Conn
 		conn *Connection
 		err error
 	)
-	if wxConn, err = upgrader.Upgrade(w, r, nil); err != nil {
+	if wsConn, err = upgrader.Upgrade(w, r, nil); err != nil {
 		return
 	}
 
-	if conn, err = initConnection(wxConn, ws.setManager);err != nil{
+	if conn, err = initConnection(wsConn, ws.setManager);err != nil{
 		goto ERR
 	}
-
-	ws.setManager.AddConnection(conn)
 
 ERR:
 	conn.Close()
 }
 
 //TODO:可实现相应的 http server 配置
-func (ws *WsServer)Start(shardCount int)(err error) {
+func (ws *WsServer)Start(setManager SetManagerAble)(err error) {
 
-	ws.setManager = new(net.SetManager)
-	if err = ws.setManager.InitSetManager(shardCount);err != nil{
-		return
-	}
-
+	ws.setManager = setManager
 	mux := http.NewServeMux()
 	mux.Handle(ws.Pattern, ws)
 	ws.server = &http.Server{

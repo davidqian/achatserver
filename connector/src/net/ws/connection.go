@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/gorilla/websocket"
 	"github.com/satori/go.uuid"
-	"net/connectset"
 	"sync"
 )
 
@@ -18,32 +17,33 @@ type Connection struct {
 	closeChan chan byte
 	mutex sync.Mutex
 	isClose bool
-	setManager * net.SetManager
+	setManager SetManagerAble
 }
 
-func initConnection(wsConn *websocket.Conn, setManager *net.SetManager)(conn *Connection, err error){
+type SetManager interface {
+
+}
+
+func initConnection(wsConn *websocket.Conn, setManger SetManagerAble)(conn *Connection, err error){
 	var(
-		tmpId uuid.UUID
+		newUuiId uuid.UUID
 	)
 	conn = &Connection{
 		wsConn: wsConn,
-		inChan: make(chan []byte, 1000),
-		outChan: make(chan []byte, 1000),
+		inChan: make(chan []byte, 100),
+		outChan: make(chan []byte, 100),
 		closeChan: make(chan byte, 1),
-		setManager:setManager,
+		setManager:setManger,
 	}
 
-	if tmpId, err = uuid.NewV4(); err != nil{
+	if newUuiId, err = uuid.NewV4(); err != nil{
 		goto ERR
 	}
 
-	conn.Uuid = tmpId.String()
+	conn.Uuid = newUuiId.String()
 
 	//启动读协程
 	go conn.readLoop()
-	//启动写协程
-	//TODO: 需要看看是否还需要，需要看网卡能力？
-	go conn.writeLoop()
 
 ERR:
 	err = errors.New("uuid error")
@@ -62,8 +62,6 @@ func (conn *Connection)Close(){
 		conn.isClose = true
 	}
 	conn.mutex.Unlock()
-
-	conn.setManager.RemoveConnection(conn)
 }
 
 func (conn *Connection) ReadMessage()(data[]byte, err error){
@@ -75,12 +73,16 @@ func (conn *Connection) ReadMessage()(data[]byte, err error){
 	return
 }
 
+//TODO:直接把数据给网卡，是否需要考虑合包？
 func (conn *Connection) WriteMessage(data []byte)(err error){
-	select {
-	case conn.outChan <- data:
-	case <- conn.closeChan:
-		err = errors.New("connection is closed!")
+	if conn.isClose {
+		err = errors.New("socket is closed!")
 	}
+	if err = conn.wsConn.WriteMessage(websocket.TextMessage,data); err != nil{
+		goto ERR
+	}
+ERR:
+	conn.Close()
 	return
 }
 
@@ -104,22 +106,3 @@ ERR:
 	conn.Close()
 }
 
-//TODO: 如何合并包？
-func (conn *Connection) writeLoop(){
-	var(
-		data []byte
-		err error
-	)
-	for{
-		select {
-		case data = <- conn.outChan:
-		case <- conn.closeChan:
-			goto ERR
-		}
-		if err = conn.wsConn.WriteMessage(websocket.TextMessage,data); err != nil{
-			goto ERR
-		}
-	}
-ERR:
-	conn.Close()
-}

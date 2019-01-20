@@ -1,6 +1,6 @@
 package net
 
-type NetServerAble interface {
+type ServerAble interface {
 	Start() error
 	Stop() error
 }

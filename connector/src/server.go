@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"net/connectionSet"
 	"net/ws"
 )
 
@@ -9,6 +10,7 @@ func startWs(){
 	var(
 		server *ws.WsServer
 		err error
+		setManager ws.SetManagerAble
 	)
 
 	server = &ws.WsServer{
@@ -16,7 +18,8 @@ func startWs(){
 		Pattern: "/ws",
 	}
 
-	if err = server.Start(100); err != nil{
+	setManager = net.InitSetManager(10)
+	if err = server.Start(setManager); err != nil{
 		log.Fatal(err)
 	}
 }
