@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/gorilla/websocket"
 	"github.com/satori/go.uuid"
-	pool2 "pool"
 	"pool/task"
 	"sync"
 )
@@ -17,10 +16,6 @@ type Connection struct {
 	mutex sync.Mutex
 	isClose bool
 	setManager SetManagerAble
-}
-
-type SetManager interface {
-
 }
 
 func initConnection(wsConn *websocket.Conn, setManger SetManagerAble)(conn *Connection, err error){
@@ -86,12 +81,8 @@ func (conn *Connection) readLoop(){
 		if _,data,err = conn.wsConn.ReadMessage();err != nil{
 			goto ERR
 		}
-		//TODO: task 需要按协议封装
-		var task pool2.TaskAble
-		task = &pool.HttpRequestTask{
-			Payload: data,
-			Conn:conn,
-		}
+
+		task := pool.MakeTaskFromPayload(data, conn)
 		conn.setManager.AddRequestTask(task, conn)
 	}
 ERR:

@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/connectionSet"
 	"net/ws"
+	"pool/task"
 )
 
 func startWs(){
@@ -12,6 +13,9 @@ func startWs(){
 		err error
 		setManager ws.SetManagerAble
 	)
+
+	pool.GetMapHandlerInstance()
+	pool.InitMapHandler()
 
 	server = &ws.WsServer{
 		Addr: "0.0.0.0:8888",

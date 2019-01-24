@@ -1,6 +1,9 @@
 package pool
 
-import "net/http"
+import (
+	"net/http"
+	"time"
+)
 
 type Worker struct {
 	Workbench       chan TaskAble
@@ -25,6 +28,7 @@ func NewWorker(WorkbenchQueue chan chan TaskAble) (work *Worker) {
 
 		work.httpClient = &http.Client{
 			Transport: tr,
+			Timeout: time.Second * 2,
 		}
 		return
 }

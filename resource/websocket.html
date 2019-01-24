@@ -14,7 +14,8 @@
         
         echo_websocket.onopen = function (evt) {
           writeToScreen("Connected !");
-          //doSend(textID.value);
+	  var init = {"length":100,"headerLen":10,"version":1,"operate":1,"seqId":1,"body":"init"};
+          doSend(JSON.stringify(init));
         };
         echo_websocket.onmessage = function (evt) {
           writeToScreen("Received message: " + evt.data);
@@ -74,13 +75,11 @@
 <h1>Echo Server</h1>
 <div style="text-align: left;">
   <form action="">
-    <input onclick="closeWebSocket()" value="关闭socket长链接" type="button">
-    </ br>
-    </ br>
+    <input onclick="closeWebSocket()" value="关闭" type="button">
+    <br />
+    <br />
     <input id="textID" name="message" value="hello chat server" type="text">
-    </ br>
-    <input onclick="send_echo()" value="发送socket请求" type="button">
-    <br>
+    <input onclick="send_echo()" value="发送" type="button">
   </form>
 </div>
 <div id="output"></div>
