@@ -14,7 +14,8 @@ func startWs(){
 		setManager ws.SetManagerAble
 	)
 
-	pool.GetMapHandlerInstance()
+	//初始化
+	pool.InitHandlerInstance()
 	pool.InitMapHandler()
 
 	server = &ws.WsServer{

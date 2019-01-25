@@ -10,7 +10,7 @@ type MapHandler struct {
 	HandlerMap map[uint32]func(*http.Client, *Task)(error)
 }
 
-func GetMapHandlerInstance()(mapHandler *MapHandler){
+func InitHandlerInstance()(mapHandler *MapHandler){
 	if(instance == nil){
 		instance = &MapHandler{
 			HandlerMap:make(map[uint32]func(*http.Client, *Task)(error)),
