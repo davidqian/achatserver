@@ -41,12 +41,15 @@ ERR:
 	return
 }
 
+func (conn *Connection) GetConnectionStatus()(closed bool){
+	return conn.isClose
+}
+
 func (conn *Connection)Close(){
 
 	//线程安全的，可重入的
 	conn.wsConn.Close()
 
-	//closeChan 关闭只能被调用一次
 	conn.mutex.Lock()
 	if !conn.isClose {
 		conn.isClose = true
@@ -77,11 +80,11 @@ func (conn *Connection) readLoop(){
 		data []byte
 		err error
 	)
+
 	for{
 		if _,data,err = conn.wsConn.ReadMessage();err != nil{
 			goto ERR
 		}
-
 		task := pool.MakeTaskFromPayload(data, conn)
 		conn.setManager.AddRequestTask(task, conn)
 	}

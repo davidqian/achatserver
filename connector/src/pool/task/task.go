@@ -11,9 +11,9 @@ type Task struct {
 	Conn ConnectionAble
 }
 
-func (task *Task) DoTask(httpClient *http.Client)(err error){
+func (task *Task) DoTask(httpClient *http.Client){
 	fun := GetHandlerByOperate(task.Protocol.Operate)
-	err = fun(httpClient, task)
+	fun(httpClient, task)
 	return
 }
 
