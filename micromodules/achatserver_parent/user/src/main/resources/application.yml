@@ -4,8 +4,8 @@ spring:
   application:
     name: user
   datasource:
-    driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/achatserver_user?characterEncoding=utf8mb4
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/achatserver_user?characterEncoding=utf8
     username: root
     password: root
   jpa:

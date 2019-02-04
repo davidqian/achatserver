@@ -7,7 +7,7 @@ import javax.persistence.UniqueConstraint;
 import java.io.Serializable;
 
 @Entity
-@Table(name = "user", uniqueConstraints = {@UniqueConstraint(columnNames="user_name")})
+@Table(name = "user", uniqueConstraints = {@UniqueConstraint(columnNames="mobile")})
 public class User implements Serializable {
 
     @Id
