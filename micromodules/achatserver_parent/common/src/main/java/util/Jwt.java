@@ -11,11 +11,13 @@ import java.util.Date;
 /**
  * Created by david on 2019/2/3.
  */
+
+@ConfigurationProperties("jwt.config")
 public class Jwt {
 
     private String key ;
 
-    private long ttl ;//一个小时
+    private long ttl ;//一天
 
     public String getKey() {
         return key;

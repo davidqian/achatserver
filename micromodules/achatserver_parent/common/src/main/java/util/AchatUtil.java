@@ -2,8 +2,12 @@ package util;
 
 import javax.servlet.http.HttpServletRequest;
 import java.net.InetAddress;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-public class GetClientIp {
+public class AchatUtil {
+
+    //获取客户端ip地址
     public String getIpAddr(HttpServletRequest request) {
         String ip = request.getHeader("x-forwarded-for");
 
@@ -35,5 +39,12 @@ public class GetClientIp {
             }
         }
         return ip;
+    }
+
+    public boolean isMobileNO(String mobiles) {
+
+        Pattern p = Pattern.compile("^((13[0-9])|(15[^4,\\D])|(18[0-9])|(14[5,7])| (17[0,1,3,5-8]))\\d{8}$");
+        Matcher m = p.matcher(mobiles);
+        return m.matches();
     }
 }

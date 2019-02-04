@@ -4,8 +4,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import util.GetClientIp;
+import util.AchatUtil;
 import util.IdWorker;
+import util.Jwt;
 
 @SpringBootApplication
 public class UserApplication {
@@ -26,7 +27,12 @@ public class UserApplication {
     }
 
     @Bean
-    public GetClientIp getClientIp(){
-        return new GetClientIp();
+    public AchatUtil achatUtil(){
+        return new AchatUtil();
+    }
+
+    @Bean
+    public Jwt jwt(){
+        return new Jwt();
     }
 }

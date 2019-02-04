@@ -11,3 +11,8 @@ spring:
   jpa:
     database: mysql
     show-sql: true
+  redis:
+    host: 127.0.0.1
+jwt:
+  config: achatserver
+  ttl: 3600000
