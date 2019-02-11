@@ -42,18 +42,22 @@ func loginKey(uid string)(key string){
 }
 
 func LoginLock(uid string, value string)(locked bool, err error){
-	_, err = redis.String(RedisPool().Get().Do("SET", loginKey(uid), value, "EX", 5, "NX"))
+	c := RedisPool().Get()
+	_, err = redis.String(c.Do("SET", loginKey(uid), value, "EX", 5, "NX"))
 	if err == redis.ErrNil{
 		return false, nil
 	}
 	if err != nil{
 		return false, err
 	}
+	c.Close()
 	return true, nil
 }
 
 func LoginUnlock(uid string)(err error){
-	_, err = RedisPool().Get().Do("del", loginKey(uid))
+	c := RedisPool().Get()
+	defer c.Close()
+	_, err = c.Do("del", loginKey(uid))
 	return
 }
 
