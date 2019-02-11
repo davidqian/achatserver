@@ -2,7 +2,6 @@ package protocol
 
 import (
 	"encoding/json"
-	"fmt"
 )
 
 type Protocol struct {
@@ -45,9 +44,15 @@ func (p *Protocol)Decode(payload []byte)(err error){
 	p.Body = body.Bytes()
 	**/
 	err = json.Unmarshal(payload, p)
-	fmt.Println(p.Operate)
-	fmt.Println(p.Version)
-	fmt.Println(p.SeqId)
-	fmt.Println(p.Body)
+	return
+}
+
+func MakeProtocol(operate uint32, seqId uint32, body string)(proto Protocol){
+	proto = Protocol{
+		Version: 1, //需要从配置里那到 version
+		Operate: operate,
+		SeqId: seqId,
+		Body: body,
+	}
 	return
 }

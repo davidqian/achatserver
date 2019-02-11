@@ -1,7 +1,9 @@
 package pool
 
 type ConnectionAble interface {
-	WriteMessage(data []byte)(err error)
+	WriteMessage(data []byte)(error)
 	Close()
-	GetConnectionStatus()(closed bool)
+	GetConnectionStatus()(bool)
+	Inited()(bool)
+	SetUid(string)
 }

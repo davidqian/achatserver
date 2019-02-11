@@ -15,6 +15,7 @@ type Connection struct {
 	wsConn *websocket.Conn
 	mutex sync.Mutex
 	isClose bool
+	inited bool
 	setManager SetManagerAble
 }
 
@@ -23,6 +24,7 @@ func initConnection(wsConn *websocket.Conn, setManger SetManagerAble)(conn *Conn
 		newUuiId uuid.UUID
 	)
 	conn = &Connection{
+		inited: false,
 		wsConn: wsConn,
 		setManager:setManger,
 	}
@@ -41,8 +43,18 @@ ERR:
 	return
 }
 
+func (conn *Connection) SetUid(uid string){
+	conn.inited = true
+	conn.UniqueId = uid
+	conn.setManager.AddConnection(conn)
+}
+
 func (conn *Connection) GetConnectionStatus()(closed bool){
 	return conn.isClose
+}
+
+func (conn *Connection) Inited()(inited bool){
+	return conn.inited
 }
 
 func (conn *Connection)Close(){

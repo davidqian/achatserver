@@ -4,17 +4,19 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <title>Web Socket JavaScript Echo Client</title>
   <script src="http://cdn.jsdelivr.net/sockjs/1/sockjs.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
   <script language="javascript" type="text/javascript">
     var echo_websocket;
     var wsUri = "ws://localhost:8888/ws";
-    
-    function createWebsocket()
+
+    function createWebsocket(token)
     {
         echo_websocket = new WebSocket(wsUri);
-        
+
         echo_websocket.onopen = function (evt) {
           writeToScreen("Connected !");
-	  var init = {"length":100,"headerLen":10,"version":1,"operate":1,"seqId":1,"body":"init"};
+	        var init = {"length":100,"headerLen":10,"version":1,"operate":1,"seqId":1,"body":JSON.stringify({"token":token})};
+          console.log(init)
           doSend(JSON.stringify(init));
         };
         echo_websocket.onmessage = function (evt) {
@@ -29,22 +31,38 @@
         echo_websocket.onclose = function () {
             writeToScreen('<span style="color: red;">CLOSE:</span> ');
           };
-          
+
         clearScreen();
     }
-    
-    
-    function init() {
-      output = document.getElementById("output");
-      writeToScreen("Connecting to " + wsUri);
-      
-      createWebsocket();
+
+    function loginData(){
+      return {
+	        "mobile": "13488872052",
+	        "password": "1234567"
+        }
     }
- 
+    function init() {
+      $.ajax({
+        type: "POST",
+        url: "http://127.0.0.1:9000/user/login",
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify(loginData()),
+        dataType: "json",
+        success: function (message) {
+          output = document.getElementById("output");
+          writeToScreen("Connecting to " + wsUri);
+          createWebsocket(message.data.token);
+        },
+        error: function (message) {
+          writeToScreen(message)
+        }
+      });
+    }
+
     function send_echo() {
     	if(echo_websocket!=null && echo_websocket.readyState==1)
     	{
-    		doSend(textID.value);    	
+    		doSend(textID.value);
     	} else
     	{
     		createWebsocket();
@@ -64,10 +82,10 @@
       pre.style.wordWrap = "break-word";
       pre.innerHTML = message;
       output.appendChild(pre);
-    }    
+    }
     function clearScreen(message) {
         output.innerHTML="";
-      }       
+      }
     window.addEventListener("load", init, false);
   </script>
 </head>

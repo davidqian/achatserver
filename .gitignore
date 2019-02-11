@@ -3,3 +3,4 @@
 *.iml
 */target/
 resource/.DS_Store
+connector/pkg/
