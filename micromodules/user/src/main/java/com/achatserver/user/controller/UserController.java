@@ -59,14 +59,19 @@ public class UserController {
             if(passwordLen >= 6 && passwordLen <= 20) {
                 if (userService.checkCode(user.getMobile(), code)) {
                     String clientIp = achatUtil.getIpAddr(request);
-                    String id = userService.register(user, clientIp);
-                    if (id != null) {
-                        String jwtData = jwt.createJWT(id, "login", "user");
-                        Map data = new HashMap();
-                        data.put("token", jwtData);
-                        return new Result(true, StatusCode.OK, "注册成功", data);
-                    } else {
-                        return new Result(false, StatusCode.REGISTERERROR, "注册失败");
+                    User checkUser = userService.getByMobile(user.getMobile());
+                    if(checkUser == null) {
+                        String id = userService.register(user, clientIp);
+                        if (id != null) {
+                            String jwtData = jwt.createJWT(id, "login", "user");
+                            Map data = new HashMap();
+                            data.put("token", jwtData);
+                            return new Result(true, StatusCode.OK, "注册成功", data);
+                        } else {
+                            return new Result(false, StatusCode.REGISTERERROR, "注册失败");
+                        }
+                    }else{
+                        return new Result(false, StatusCode.REGISTERERROR, "重复注册");
                     }
                 } else {
                     return new Result(false, StatusCode.REGISTERERROR, "验证码不正确");

@@ -1,11 +1,11 @@
 server:
-  port: 9000
+  port: 9002
 spring:
   application:
-    name: user
+    name: uid
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/achatserver_user?characterEncoding=utf8
+    url: jdbc:mysql://127.0.0.1:3306/achatserver_uid?characterEncoding=utf8
     username: root
     password: root
   jpa:
@@ -14,9 +14,3 @@ spring:
     hibernate:
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-  redis:
-    host: 127.0.0.1
-jwt:
-  config:
-    key: achatserver
-    ttl: 3600000

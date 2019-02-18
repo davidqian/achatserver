@@ -50,10 +50,6 @@ public class UserService {
     }
 
     public String register(User user, String clientIp){
-        User dbUser = getByMobile(user.getMobile());
-        if(dbUser != null){
-            return null;
-        }
         Timestamp now = new Timestamp(new Date().getTime());
         String id = idWorker.nextId() + "";
         user.setUid(id);
@@ -97,7 +93,7 @@ public class UserService {
         return "login_check_code_" + mobile;
     }
 
-    private User getByMobile(String mobile){
+    public User getByMobile(String mobile){
         return userDao.findByMobile(mobile);
     }
 }
