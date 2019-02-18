@@ -11,6 +11,7 @@
         <module>common</module>
         <module>user</module>
         <module>uid</module>
+        <module>eureka</module>
     </modules>
 
     <packaging>pom</packaging>
