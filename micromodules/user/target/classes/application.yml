@@ -2,7 +2,7 @@ server:
   port: 9000
 spring:
   application:
-    name: user
+    name: user-service
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
     url: jdbc:mysql://127.0.0.1:3306/achatserver_user?characterEncoding=utf8

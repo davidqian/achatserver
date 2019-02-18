@@ -1,6 +1,7 @@
 package com.achatserver.user.controller;
 
 import com.achatserver.user.pojo.User;
+import com.achatserver.user.service.UidService;
 import com.achatserver.user.service.UserService;
 import entity.Result;
 import entity.StatusCode;
@@ -22,6 +23,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private UidService uidService;
 
     @Autowired
     private AchatUtil achatUtil;
@@ -61,14 +65,19 @@ public class UserController {
                     String clientIp = achatUtil.getIpAddr(request);
                     User checkUser = userService.getByMobile(user.getMobile());
                     if(checkUser == null) {
-                        String id = userService.register(user, clientIp);
-                        if (id != null) {
-                            String jwtData = jwt.createJWT(id, "login", "user");
+                        Result uidRes = uidService.getUid();
+                        if(uidRes.isFlag()) {
+                            Map<String, Integer> uidData = (Map<String, Integer>) uidRes.getData();
+                            int uid = uidData.get("uid");
+                            String suid = uid + "";
+                            user.setUid(suid);
+                            userService.register(user, clientIp);
+                            String jwtData = jwt.createJWT(suid, "login", "user");
                             Map data = new HashMap();
                             data.put("token", jwtData);
                             return new Result(true, StatusCode.OK, "注册成功", data);
-                        } else {
-                            return new Result(false, StatusCode.REGISTERERROR, "注册失败");
+                        }else{
+                            return new Result(false, StatusCode.ERROR, "调用uid服务失败");
                         }
                     }else{
                         return new Result(false, StatusCode.REGISTERERROR, "重复注册");

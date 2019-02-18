@@ -49,18 +49,16 @@ public class UserService {
         return null;
     }
 
-    public String register(User user, String clientIp){
+    public void register(User user, String clientIp){
         Timestamp now = new Timestamp(new Date().getTime());
-        String id = idWorker.nextId() + "";
-        user.setUid(id);
         user.setPassword(encoder.encode(user.getPassword()));
         user.setRegisterIp(clientIp);
         user.setRegisterTime(now);
         user.setLastLoginIp(clientIp);
         user.setLastLoginTime(now);
         user.setLastLoginIp(clientIp);
+        user.setLastLoginFlag(System.currentTimeMillis() + "");
         userDao.save(user);
-        return id;
     }
 
     public int sendIdentityCode(String mobile){
