@@ -9,7 +9,6 @@ public class ThreadMap {
         for(int i = 0; i < 4; i++){
             WorkThread workThread = new WorkThread(i);
             workThread.start();
-            System.out.println("thread " + i + " runing");
         }
     }
 }

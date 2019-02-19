@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 
+import java.util.function.Consumer;
+
 @RestController
 @CrossOrigin
 @RequestMapping("/uid")
@@ -24,17 +26,21 @@ public class UidController {
         deferredResult.onTimeout(new Runnable(){
             @Override
             public void run() {
-                System.out.println(Thread.currentThread().getName() + " onTimeout");
-                // 返回超时信息
                 deferredResult.setErrorResult(new Result(false, StatusCode.ERROR, "请求超时"));
             }
         });
 
-        // 处理完成的回调方法，无论是超时还是处理成功，都会进入这个回调方法
+        deferredResult.onError(new Consumer<Throwable>() {
+            @Override
+            public void accept(Throwable throwable) {
+                throwable.printStackTrace();
+                deferredResult.setErrorResult(new Result(false, StatusCode.ERROR, "请求错误"));
+            }
+        });
+
         deferredResult.onCompletion(new Runnable(){
             @Override
             public void run() {
-                System.out.println(Thread.currentThread().getName() + " onCompletion");
             }
         });
 

@@ -6,13 +6,6 @@ import com.achatserver.uid.service.UidService;
 import com.achatserver.uid.util.SpringContextUtil;
 import entity.Result;
 import entity.StatusCode;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.ContextLoader;
-import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import java.util.HashMap;
@@ -20,6 +13,8 @@ import java.util.Map;
 import java.util.concurrent.LinkedBlockingDeque;
 
 public class WorkThread extends Thread{
+
+    private UidService uidService;
 
     private int threadId;
 
@@ -35,15 +30,22 @@ public class WorkThread extends Thread{
         this.setFromDb();
     }
 
+    private UidService getUidService(){
+        if(uidService == null){
+            uidService = (UidService)SpringContextUtil.getBean(UidService.class);
+        }
+        return uidService;
+    }
+
     private boolean setFromDb(){
-        UidService uidService = (UidService)SpringContextUtil.getBean(UidService.class);
+
+        getUidService();
+
         IdSegment idSegment = uidService.addMaxId();
 
         maxUid = idSegment.getMaxId();
         step = idSegment.getStep();
 
-        System.out.println("maxUid = " + maxUid);
-        System.out.println("step = " + step);
         curUid = maxUid;
         return true;
     }

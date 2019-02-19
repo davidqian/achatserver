@@ -33,6 +33,7 @@ public class UidService {
 
     @Async
     public void execute(DeferredResult<Result> deferred){
+        //TODO: 需要对线程状态进行判断
         if(curQueueId > maxQueueId){
             curQueueId = 0;
         }

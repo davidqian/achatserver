@@ -12,6 +12,7 @@
         <module>user</module>
         <module>uid</module>
         <module>eureka</module>
+        <module>seqid</module>
     </modules>
 
     <packaging>pom</packaging>

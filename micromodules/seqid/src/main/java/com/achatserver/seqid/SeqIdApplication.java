@@ -1,15 +1,13 @@
-package com.achatserver.uid;
+package com.achatserver.seqid;
 
-import com.achatserver.uid.thread.ThreadMap;
-import com.achatserver.uid.thread.ThreadQueue;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 
 @EnableEurekaClient
 @SpringBootApplication
-public class UidApplication {
+public class SeqIdApplication {
     public static void main(String[] args) {
-        SpringApplication.run(UidApplication.class, args);
+        SpringApplication.run(SeqIdApplication.class, args);
     }
 }
