@@ -4,11 +4,11 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
-public class WorkThread extends Thread {
+public class WorkThread extends Thread{
 
     private int threadId;
 
-    private Map<BigDecimal, BigDecimal> uidSeqIdMap = new HashMap<>();
+    private Map<Long, Map<BigDecimal, BigDecimal>> uidSeqIdMap = new HashMap<>();
 
     public WorkThread(int threadId){
         this.threadId = threadId;
