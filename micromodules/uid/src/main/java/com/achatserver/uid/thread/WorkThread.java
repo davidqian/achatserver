@@ -8,6 +8,7 @@ import entity.Result;
 import entity.StatusCode;
 import org.springframework.web.context.request.async.DeferredResult;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -18,16 +19,19 @@ public class WorkThread extends Thread{
 
     private int threadId;
 
-    private int maxUid;
+    private BigDecimal maxUid;
 
-    private int step;
+    private BigDecimal step;
 
-    private int curUid;
+    private BigDecimal curUid;
+
+    private BigDecimal topUid;
+
+    private Boolean initFromDb = false;
 
 
     public WorkThread(int threadId){
         this.threadId = threadId;
-        this.setFromDb();
     }
 
     private UidService getUidService(){
@@ -39,14 +43,15 @@ public class WorkThread extends Thread{
 
     private boolean setFromDb(){
 
-        getUidService();
-
-        IdSegment idSegment = uidService.addMaxId();
+        IdSegment idSegment = getUidService().addMaxId();
 
         maxUid = idSegment.getMaxId();
         step = idSegment.getStep();
-
+        topUid = maxUid.add(step);
         curUid = maxUid;
+
+        initFromDb = true;
+
         return true;
     }
 
@@ -58,11 +63,11 @@ public class WorkThread extends Thread{
             if(request == null){
                 continue;
             }
-            if(curUid == maxUid + step){
+            if(!initFromDb || curUid.equals(topUid)){
                 setFromDb();
             }
-            curUid++;
-            Map<String, Integer> data = new HashMap();
+            curUid.add(new BigDecimal(1));
+            Map<String, BigDecimal> data = new HashMap();
             data.put("uid", curUid);
             request.setResult(new Result(true, StatusCode.OK, "获取成功", data));
         }

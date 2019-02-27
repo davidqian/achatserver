@@ -5,13 +5,14 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 @Entity
 @Table(name = "user", uniqueConstraints = {@UniqueConstraint(columnNames="mobile")})
 public class User implements Serializable {
     @Id
-    private String uid;
+    private BigDecimal uid;
 
     private String mobile;
 
@@ -35,11 +36,11 @@ public class User implements Serializable {
         this.lastLoginFlag = lastLoginFlag;
     }
 
-    public String getUid() {
+    public BigDecimal getUid() {
         return uid;
     }
 
-    public void setUid(String uid) {
+    public void setUid(BigDecimal uid) {
         this.uid = uid;
     }
 

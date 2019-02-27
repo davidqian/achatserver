@@ -14,6 +14,7 @@ public class SeqIdController {
 
     @RequestMapping("/{uid}")
     public Result getSeqId(@PathVariable String uid){
+       //TODO: 需要验证uid是否在当前的服务中
        return new Result(true, StatusCode.OK, "获取成功");
     }
 }

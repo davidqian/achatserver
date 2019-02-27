@@ -4,6 +4,7 @@ package com.achatserver.uid.pojo;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "idSegment")
@@ -12,23 +13,23 @@ public class IdSegment {
     @Id
     private String type;
 
-    private int maxId;
+    private BigDecimal maxId;
 
-    private int step;
+    private BigDecimal step;
 
-    public int getStep() {
+    public BigDecimal getStep() {
         return step;
     }
 
-    public void setStep(int step) {
+    public void setStep(BigDecimal step) {
         this.step = step;
     }
 
-    public int getMaxId() {
+    public BigDecimal getMaxId() {
         return maxId;
     }
 
-    public void setMaxId(int maxId) {
+    public void setMaxId(BigDecimal maxId) {
         this.maxId = maxId;
     }
 

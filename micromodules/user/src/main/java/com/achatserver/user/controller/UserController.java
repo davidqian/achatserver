@@ -13,6 +13,7 @@ import util.IdWorker;
 import util.Jwt;
 
 import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -67,12 +68,11 @@ public class UserController {
                     if(checkUser == null) {
                         Result uidRes = uidService.getUid();
                         if(uidRes.isFlag()) {
-                            Map<String, Integer> uidData = (Map<String, Integer>) uidRes.getData();
-                            int uid = uidData.get("uid");
-                            String suid = uid + "";
-                            user.setUid(suid);
+                            Map<String, BigDecimal> uidData = (Map<String, BigDecimal>) uidRes.getData();
+                            BigDecimal uid = uidData.get("uid");
+                            user.setUid(uid);
                             userService.register(user, clientIp);
-                            String jwtData = jwt.createJWT(suid, "login", "user");
+                            String jwtData = jwt.createJWT(uid.toString(), "login", "user");
                             Map data = new HashMap();
                             data.put("token", jwtData);
                             return new Result(true, StatusCode.OK, "注册成功", data);
@@ -98,7 +98,7 @@ public class UserController {
         String clientIp = achatUtil.getIpAddr(request);
         User dbUser = userService.login(user, clientIp);
         if(dbUser != null){
-            String jwtData = jwt.createJWT(dbUser.getUid(), dbUser.getLastLoginFlag(), "user");
+            String jwtData = jwt.createJWT(dbUser.getUid().toString() , dbUser.getLastLoginFlag(), "user");
             Map data = new HashMap();
             data.put("token", jwtData);
             return new Result(true, StatusCode.OK, "登录成功", data);
