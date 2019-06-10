@@ -10,7 +10,7 @@ import javax.persistence.LockModeType;
 public interface SeqIdDao extends JpaSpecificationExecutor<SeqIdSegment>, JpaRepository<SeqIdSegment, String> {
 
     @Lock(value = LockModeType.PESSIMISTIC_WRITE)
-    @Query(value = "select t from SeqIdSegment t where t.seqId =?1 ")
+    @Query(value = "select t from SeqIdSegment t where t.seqId =?1")
     public SeqIdSegment queryBySeqId( long seqId );
 
     @Modifying

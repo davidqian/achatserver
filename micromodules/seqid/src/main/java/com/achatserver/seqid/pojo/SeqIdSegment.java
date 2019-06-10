@@ -1,13 +1,14 @@
 package com.achatserver.seqid.pojo;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "seqidSegment")
 public class SeqIdSegment {
 
+    @Id
+    @GeneratedValue
     private long seqId;
     private BigDecimal maxSeqId;
     private BigDecimal step;
@@ -38,6 +39,8 @@ public class SeqIdSegment {
         this.maxSeqId = maxSeqId;
     }
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     public long getSeqId() {
         return seqId;
     }

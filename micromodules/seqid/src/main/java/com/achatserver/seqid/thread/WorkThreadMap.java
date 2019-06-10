@@ -1,16 +1,16 @@
 package com.achatserver.seqid.thread;
 
+import com.achatserver.seqid.pojo.SeqIdRelation;
 import com.achatserver.seqid.pojo.SeqIdSegment;
 import com.achatserver.seqid.request.DeferRequest;
 import com.achatserver.seqid.service.SeqIdService;
 import com.achatserver.seqid.util.SpringContextUtil;
-import entity.Result;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.request.async.DeferredResult;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 
 @Component
@@ -22,7 +22,7 @@ public class WorkThreadMap {
 
     public static Map<Integer, LinkedBlockingDeque<DeferRequest>> threadMap = new HashMap<Integer, LinkedBlockingDeque<DeferRequest>>();
 
-    public static Map<Long, SeqIdSegment> segmentMaxSeqIdMap = new HashMap<>();
+    public static Map<Long, SeqIdRelation> segmentMaxSeqIdMap = new ConcurrentHashMap<>();
 
     public static void initMap(){
 
@@ -39,50 +39,71 @@ public class WorkThreadMap {
         seqIdService = (SeqIdService) SpringContextUtil.getBean(SeqIdService.class);
     }
 
+    public static LinkedBlockingDeque<DeferRequest> getThreadQueue(int threadId){
+        return threadMap.get(threadId);
+    }
+
     public static void addQueue(DeferRequest deferRequest){
         int index = deferRequest.getUid().divideAndRemainder(new BigDecimal(threadNum))[1].intValue();
         threadMap.get(index).addLast(deferRequest);
     }
 
-    public static SeqIdSegment getSegment(BigDecimal uid){
-        SeqIdSegment retSeqIdSegment = null;
-        for(Map.Entry<Long, SeqIdSegment> entry : segmentMaxSeqIdMap.entrySet()){
-            SeqIdSegment seqIdSegment = entry.getValue();
-            if(seqIdSegment.getStart().compareTo(uid) <= 0 && seqIdSegment.getEnd().compareTo(uid) > 0){
-                retSeqIdSegment = entry.getValue();
+    public static Long getUidBelong(BigDecimal uid){
+        long belong = 0L;
+        for(Map.Entry<Long, SeqIdRelation> entry : segmentMaxSeqIdMap.entrySet()){
+            SeqIdRelation tmpSeqIdRelation = entry.getValue();
+            if(tmpSeqIdRelation.getStart().compareTo(uid) <= 0
+                    && tmpSeqIdRelation.getEnd().compareTo(uid) > 0){
+                belong = entry.getKey();
                 break;
             }
         }
-        return retSeqIdSegment;
+        return belong;
     }
 
-    public static BigDecimal getSeqId(BigDecimal uid, BigDecimal currSeqId){
+    public static SeqIdRelation getSegment(BigDecimal uid, long belong){
+        if(belong == 0) {
+            belong = getUidBelong(uid);
+        }
+        return  segmentMaxSeqIdMap.get(belong);
+    }
 
-        //TODO: 需要处理异常情况
-        SeqIdSegment seqIdSegment = getSegment(uid);
+    public static BigDecimal getSeqId(BigDecimal uid, long belong, BigDecimal currSeqId){
 
-        //TODO: 如何处理用户初始化?
+        SeqIdRelation seqIdRelation = getSegment(uid, belong);
 
-        if(!checkMaxSeqId(seqIdSegment, currSeqId)){
-            synchronized (seqIdSegment){
-                if(!checkMaxSeqId(seqIdSegment, currSeqId)){
-                    addFromDb(seqIdSegment);
+        if(seqIdRelation == null){
+            return null;
+        }
+
+        if(currSeqId == null){
+            currSeqId = seqIdRelation.getBeginSeqId();
+        }
+
+        if(!checkMaxSeqId(seqIdRelation, currSeqId)){
+            synchronized (seqIdRelation){
+                if(!checkMaxSeqId(seqIdRelation, currSeqId)){
+                    addFromDb(seqIdRelation);
                 }
             }
         }
         return currSeqId.add(new BigDecimal(1));
     }
 
-    public static Boolean checkMaxSeqId(SeqIdSegment seqIdSegment, BigDecimal currSeqId){
-        if(seqIdSegment.getMaxSeqId().compareTo(currSeqId) > 0){
+    public static Boolean checkMaxSeqId(SeqIdRelation seqIdRelation, BigDecimal currSeqId){
+        if(seqIdRelation.getMaxSeqId().compareTo(currSeqId) > 0){
             return true;
         }else{
             return false;
         }
     }
 
-    public static void addFromDb(SeqIdSegment seqIdSegment){
-        SeqIdSegment dbSeqIdSegment = seqIdService.addMaxId(seqIdSegment);
-        seqIdSegment.setMaxSeqId(seqIdSegment.getMaxSeqId().add(dbSeqIdSegment.getStep()));
+    public static void addFromDb(SeqIdRelation seqIdRelation){
+        SeqIdSegment seqIdSegment = seqIdService.addMaxId(seqIdRelation);
+        seqIdRelation.setBeginSeqId(seqIdSegment.getMaxSeqId());
+        seqIdRelation.setStart(seqIdSegment.getStart());
+        seqIdRelation.setEnd(seqIdSegment.getEnd());
+        seqIdRelation.setStep(seqIdSegment.getStep());
+        seqIdRelation.setMaxSeqId(seqIdSegment.getMaxSeqId().add(seqIdSegment.getStep()));
     }
 }
